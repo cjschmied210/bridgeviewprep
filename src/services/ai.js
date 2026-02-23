@@ -1,7 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Initialize the new Gemini API client
-const API_KEY = "AIzaSyBBRaAlqmS0i6uZEkwKnZxFYc592DOLpCw";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+if (!API_KEY) {
+    console.error("VITE_GEMINI_API_KEY is not defined in the environment variables!");
+}
 const aiDialog = new GoogleGenAI({ apiKey: API_KEY });
 
 // Define the required output schema for the model to ensure strict JSON adherence
