@@ -889,26 +889,7 @@ export default function TeacherDashboard() {
                             </CardContent>
                         </Card>
 
-                        {/* Passage Editor */}
-                        <Card>
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-lg text-academic-500 uppercase tracking-wider text-xs flex justify-between items-center">
-                                    <span>Reading Passage</span>
-                                    <span className="text-academic-400 normal-case text-xs font-normal">Use double newlines to separate paragraphs. Embed [line numbers] directly into the text.</span>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <textarea
-                                    value={(draftQuiz.passage || []).join('\n\n')}
-                                    onChange={(e) => {
-                                        const newPassage = e.target.value.split('\n\n').filter(p => p.trim() !== '');
-                                        setDraftQuiz({ ...draftQuiz, passage: newPassage });
-                                    }}
-                                    className="w-full h-64 p-4 text-base font-serif leading-relaxed border-2 border-academic-200 rounded-xl focus:border-primary focus:ring-0 outline-none transition-colors resize-y"
-                                    placeholder="Enter or edit reading passage here..."
-                                />
-                            </CardContent>
-                        </Card>
+                        {/* Passage Editor removed — passages are now edited per-question below */}
 
                         {/* Questions Editor */}
                         <div className="space-y-6">
@@ -920,6 +901,22 @@ export default function TeacherDashboard() {
                                         {qIndex + 1}
                                     </div>
                                     <CardContent className="p-6 md:p-8 space-y-6 ml-2">
+
+                                        {/* Per-Question Passage */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-academic-500 uppercase tracking-wider mb-2">Reading Passage for this Question</label>
+                                            <textarea
+                                                value={(q.passage || []).join('\n\n')}
+                                                onChange={(e) => {
+                                                    const updatedQuestions = [...draftQuiz.questions];
+                                                    const newPassage = e.target.value.split('\n\n').filter(p => p.trim() !== '');
+                                                    updatedQuestions[qIndex] = { ...q, passage: newPassage };
+                                                    setDraftQuiz({ ...draftQuiz, questions: updatedQuestions });
+                                                }}
+                                                className="w-full h-40 p-3 text-base font-serif leading-relaxed border-2 border-academic-200 rounded-xl focus:border-primary focus:ring-0 outline-none transition-colors resize-y"
+                                                placeholder="Reading passage for this question..."
+                                            />
+                                        </div>
 
                                         {/* Question Text */}
                                         <div>

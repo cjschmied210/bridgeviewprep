@@ -129,7 +129,7 @@ export default function StudentExam() {
             </header>
 
             <main className="flex-1 min-h-0 max-w-7xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left: Reading Pane (Scrollable) */}
+                {/* Left: Reading Pane (Scrollable) — shows the current question's passage */}
                 <Card className="h-full flex flex-col min-h-0 border-r shadow-sm relative overflow-hidden bg-[#fafaf9]">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-academic-200 to-transparent"></div>
                     <div className="p-6 border-b border-academic-200 bg-white">
@@ -137,10 +137,8 @@ export default function StudentExam() {
                     </div>
                     <CardContent className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                         <div className="prose prose-stone max-w-none text-academic-800 leading-relaxed space-y-4">
-                            {(question.passage && question.passage.length > 0
-                                ? question.passage
-                                : (testConfig.passage || [])
-                            ).map((paragraph, i) => (
+                            {/* New quizzes: question has its own passage. Legacy quizzes: fall back to top-level passage. */}
+                            {(question.passage?.length > 0 ? question.passage : (testConfig.passage || [])).map((paragraph, i) => (
                                 <p key={i} className="text-lg leading-loose group">
                                     <span className="font-serif block hover:bg-academic-100/50 p-2 rounded-lg transition-colors cursor-text">
                                         {paragraph}

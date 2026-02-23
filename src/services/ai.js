@@ -15,11 +15,6 @@ const generationSchema = {
             type: Type.STRING,
             description: "A short, descriptive title for the reading check or quiz."
         },
-        passage: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "ONLY populated if there is ONE single shared reading passage for ALL questions in the document. If each question has its own self-contained passage, leave this as an empty array []. Preserve margin line numbers (e.g., [5], [10]) inline."
-        },
         questions: {
             type: Type.ARRAY,
             items: {
@@ -29,7 +24,7 @@ const generationSchema = {
                     passage: {
                         type: Type.ARRAY,
                         items: { type: Type.STRING },
-                        description: "If this specific question has its OWN self-contained passage (not shared with other questions), put that passage here as an array of paragraphs. Leave this as an empty array [] if all questions share the top-level passage."
+                        description: "The reading passage for THIS question, as an array of paragraphs. If all questions share one long article, copy the full article passage into every question's passage field. If each question has its own self-contained mini-paragraph (SAT/ACT style), put only that question's paragraph(s) here. This field is ALWAYS required and NEVER empty."
                     },
                     text: { type: Type.STRING, description: "The actual question text." },
                     options: {
@@ -50,30 +45,30 @@ const generationSchema = {
             }
         }
     },
-    required: ["title", "passage", "questions"]
+    required: ["title", "questions"]
 };
 
 // Common prompt instructions
 const PROMPT_INSTRUCTIONS = `
-You are an expert educational curriculum designer. 
+You are an expert educational curriculum designer.
 Analyze the provided material (image or raw text) and generate a rigorous reading comprehension quiz.
 
 Follow these strict requirements:
 
-**PASSAGE HANDLING — READ CAREFULLY:**
-- SCENARIO A (Shared passage): If the document has ONE single reading passage followed by multiple questions, put the entire passage in the top-level "passage" array and set every question's "passage" field to an empty array [].
-- SCENARIO B (Per-question passages): If each question has its OWN self-contained paragraph or excerpt (common in SAT/ACT-style "Words in Context" sections where each numbered item has its own mini-paragraph), set the top-level "passage" to an empty array [] and put each question's dedicated passage text in that question's own "passage" field.
-- Do NOT mix both. Choose one scenario that matches the document structure.
+**PASSAGE RULE (CRITICAL):**
+Every question object MUST include its own "passage" array. Never leave it empty.
+- If the document has ONE shared reading article that all questions refer to: copy the full article into EVERY question's "passage" field.
+- If each question has its OWN self-contained paragraph or excerpt (common in SAT/ACT "Words in Context" sections where each numbered box has its own text): put only that question's specific paragraph(s) into its "passage" field.
+Do NOT put passage text at the top level. All passages go inside each question object.
 
-For EITHER scenario:
-- Retain the original paragraph structure exactly. Do NOT break paragraphs into individual sentences.
+For all passages:
+- Retain the original paragraph structure exactly. Do NOT split paragraphs into individual sentences.
 - CRITICAL FOR MARGIN LINE NUMBERS: If line numbers appear in the margin (e.g., 5, 10, 15), YOU MUST embed them inline in brackets (e.g., "[5]") at the exact location they appear in the original text.
 
-1. EXTRACT the explicit multiple-choice questions provided within the reading material itself. DO NOT create your own questions. You must use the exact questions and answer choices that are already written in the uploaded document. If and only if there are absolutely NO questions provided in the document, then you may create 3 to 5 multiple-choice questions based on the material.
-2. Provide all the options for each question as they appear in the source text (typically 4 or 5 choices labeled A, B, C, D, and sometimes E).
-CRITICAL FOR OPTIONS: You must transcribe the options VERBATIM. Do NOT summarize or truncate them. If multiple options start with the same repeated phrase (common in grammar/editing questions), you MUST include the full repeated phrase in every option just as it is written on the page.
-3. Provide a clear, pedagogical "explanation" for the correct answer. If the question refers to specific lines (e.g. "lines 23-28"), your explanation MUST cite those lines and explain how the text supports the answer.
-4. You MUST return ONLY valid JSON matching the provided schema. Do not write markdown, do not write explanations outside the JSON.
+1. EXTRACT the explicit multiple-choice questions provided within the reading material itself. DO NOT create your own questions. If there are absolutely NO questions in the document, you may create 3 to 5 multiple-choice questions.
+2. Provide all answer choices VERBATIM as they appear in the source text. Do NOT summarize or truncate. If multiple options share the same opening phrase, include the full phrase in every option.
+3. Provide a clear, pedagogical "explanation" for the correct answer, citing specific lines if applicable.
+4. Return ONLY valid JSON matching the provided schema. No markdown, no explanations outside the JSON.
 `;
 
 export const aiService = {
