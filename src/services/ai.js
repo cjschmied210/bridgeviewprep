@@ -117,6 +117,11 @@ export const aiService = {
 
             const textContent = response.text;
 
+            if (!textContent) {
+                console.error("Gemini API returned an empty or undefined response text. Full response object:", response);
+                throw new Error("The AI returned an empty response. This may be due to Google's safety filters flagging the reading passage, or a temporary API hiccup. Please try a different text.");
+            }
+
             // The model is constrained by responseSchema, so textContent should be a clean JSON string
             const jsonResult = JSON.parse(textContent);
             return jsonResult;
