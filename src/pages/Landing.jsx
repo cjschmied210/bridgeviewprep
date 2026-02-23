@@ -67,7 +67,7 @@ export default function Landing() {
                     <div className="h-14 w-14 bg-primary text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
                         <BookOpen size={28} />
                     </div>
-                    <h1 className="text-3xl font-serif font-bold text-academic-900 tracking-tight">Antigravity Quiz</h1>
+                    <h1 className="text-3xl font-serif font-bold text-academic-900 tracking-tight">BridgeviewPrep</h1>
                     <p className="text-academic-500 mt-2 text-center text-sm">
                         Engage, learn, and test your knowledge.
                     </p>
