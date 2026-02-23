@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { dbService } from '../services/db';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { LogOut, Users, FileText, PlusCircle, Activity, UploadCloud, X, FolderPlus, Trash2, ClipboardList, Radio, CheckCircle2, XCircle, ArrowLeft, ChevronRight } from 'lucide-react';
+import { LogOut, Users, FileText, PlusCircle, Activity, UploadCloud, X, FolderPlus, Trash2, ClipboardList, Radio, CheckCircle2, XCircle, ArrowLeft, ChevronRight, LibraryBig } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../lib/firebase';
 import { collection, setDoc, doc } from 'firebase/firestore';
