@@ -29,13 +29,13 @@ const generationSchema = {
                         items: {
                             type: Type.OBJECT,
                             properties: {
-                                label: { type: Type.STRING, description: "A, B, C, or D" },
+                                label: { type: Type.STRING, description: "A, B, C, D, or E" },
                                 text: { type: Type.STRING, description: "The text of this answer choice" }
                             },
                             required: ["label", "text"]
                         }
                     },
-                    correctAnswer: { type: Type.STRING, description: "The uppercase letter of the correct option (A, B, C, or D)" },
+                    correctAnswer: { type: Type.STRING, description: "The uppercase letter of the correct option (e.g. A, B, C, D, or E)" },
                     explanation: { type: Type.STRING, description: "A pedagogical explanation of why this answer is correct, citing the passage." }
                 },
                 required: ["id", "text", "options", "correctAnswer", "explanation"]
@@ -54,7 +54,7 @@ Follow these strict requirements:
 1. Break the reading material down into an array of paragraphs in the "passage" array. Retain the original paragraph structure exactly as it appears in the PDF/source text (do not break it into individual sentences). 
 CRITICAL FOR MARGIN LINE NUMBERS: The source text features line numbers down the margin (e.g., Line 5, 10, 15, 20) used for question referencing. YOU MUST PRESERVE THESE LINE NUMBERS. Embed them inline directly into the text at the exact point where that line begins in the original document, formatting them in brackets (e.g., "[5]"). Example: "forms under which matter is presented to our senses. On [5] every hand, the utmost diversity is exhibited". Do not skip them!
 2. EXTRACT the explicit multiple-choice questions provided within the reading material itself. DO NOT create your own questions. You must use the exact questions and answer choices that are already written in the uploaded document. If and only if there are absolutely NO questions provided in the document, then you may create 3 to 5 multiple-choice questions based on the material.
-3. Provide exactly 4 options per question labeled A, B, C, and D.
+3. Provide all the options for each question as they appear in the source text (typically 4 or 5 choices labeled A, B, C, D, and sometimes E).
 4. Provide a clear, pedagogical "explanation" for the correct answer. If the question refers to specific lines (e.g. "lines 23-28"), your explanation MUST cite those lines and explain how the text supports the answer.
 5. You MUST return ONLY valid JSON matching the provided schema. Do not write markdown, do not write explanations outside the JSON.
 `;
