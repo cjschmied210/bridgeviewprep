@@ -137,7 +137,10 @@ export default function StudentExam() {
                     </div>
                     <CardContent className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                         <div className="prose prose-stone max-w-none text-academic-800 leading-relaxed space-y-4">
-                            {testConfig.passage.map((paragraph, i) => (
+                            {(question.passage && question.passage.length > 0
+                                ? question.passage
+                                : (testConfig.passage || [])
+                            ).map((paragraph, i) => (
                                 <p key={i} className="text-lg leading-loose group">
                                     <span className="font-serif block hover:bg-academic-100/50 p-2 rounded-lg transition-colors cursor-text">
                                         {paragraph}
