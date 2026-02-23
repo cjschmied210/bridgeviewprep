@@ -23,6 +23,7 @@ export default function TeacherDashboard() {
     const [rawText, setRawText] = useState('');
     const [generating, setGenerating] = useState(false);
     const [genSuccess, setGenSuccess] = useState(false);
+    const [draftQuiz, setDraftQuiz] = useState(null);
     const [selectedTest, setSelectedTest] = useState(null);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [projectedQuestion, setProjectedQuestion] = useState(null);
@@ -128,30 +129,47 @@ export default function TeacherDashboard() {
                 testId: newTestId,
                 classId: activeClassId,
                 title: aiGeneratedTest.title,
-                passage: aiGeneratedTest.passage,
+                passage: aiGeneratedTest.passage || [],
                 questions: aiGeneratedTest.questions.map((q, idx) => ({
                     ...q,
                     id: idx + 1
                 }))
             };
 
-            await setDoc(doc(db, 'classes', activeClassId, 'tests', newTestId), newTestConfig);
+            // Intercept and open the editor instead of saving immediately
+            setDraftQuiz(newTestConfig);
+            setGenerating(false);
+
+        } catch (error) {
+            console.error(error);
+            alert(`Failed to generate test: ${error.message || 'Unknown error'}`);
+            setGenerating(false);
+        }
+    };
+
+    const handleSaveDraftQuiz = async () => {
+        if (!draftQuiz || !activeClassId) return;
+
+        setGenerating(true); // Re-using generating state for the save-spinner
+        try {
+            await setDoc(doc(db, 'classes', activeClassId, 'tests', draftQuiz.testId), draftQuiz);
 
             // Update local tests state instantly
-            setClassTests([{ id: newTestId, ...newTestConfig }, ...classTests]);
+            setClassTests([{ id: draftQuiz.testId, ...draftQuiz }, ...classTests]);
 
             setGenSuccess(true);
             setTimeout(() => {
-                setViewMode('overview');
+                setDraftQuiz(null); // Close editor
+                setViewMode('overview'); // Return to class dashboard
                 setGenSuccess(false);
                 setSelectedFiles([]);
                 setRawText('');
-            }, 1500);
+                setGenerating(false);
+            }, 1000);
 
-        } catch (err) {
-            console.error(err);
-            alert(`Failed to generate test: ${err.message || 'Unknown error'}`);
-        } finally {
+        } catch (error) {
+            console.error("Failed to save drafted quiz:", error);
+            alert("Failed to save quiz: " + error.message);
             setGenerating(false);
         }
     };
@@ -825,6 +843,166 @@ export default function TeacherDashboard() {
                 )}
             </main>
 
+            {/* Quiz Editor Modal */}
+            {draftQuiz && (
+                <div className="fixed inset-0 z-[60] bg-academic-50 overflow-y-auto flex flex-col">
+                    <div className="sticky top-0 z-10 bg-white border-b border-academic-200 px-6 py-4 flex justify-between items-center shadow-sm">
+                        <div className="flex items-center space-x-3">
+                            <Activity className="h-6 w-6 text-primary" />
+                            <h2 className="text-2xl font-serif font-bold text-academic-900">Quiz Editor</h2>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    if (window.confirm('Are you sure you want to discard this generated quiz?')) {
+                                        setDraftQuiz(null);
+                                    }
+                                }}
+                                disabled={generating || genSuccess}
+                            >
+                                Discard Draft
+                            </Button>
+                            <Button
+                                onClick={handleSaveDraftQuiz}
+                                disabled={generating || genSuccess}
+                                variant={genSuccess ? 'success' : 'primary'}
+                            >
+                                {generating ? 'Saving...' : genSuccess ? 'Saved!' : 'Save & Assign to Class'}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="max-w-5xl mx-auto w-full p-6 md:p-8 space-y-8 pb-32">
+                        {/* Title Editor */}
+                        <Card className="border-t-4 border-t-primary">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg text-academic-500 uppercase tracking-wider text-xs">Quiz Title</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <input
+                                    type="text"
+                                    value={draftQuiz.title}
+                                    onChange={(e) => setDraftQuiz({ ...draftQuiz, title: e.target.value })}
+                                    className="w-full text-2xl font-bold p-3 border-2 border-academic-200 rounded-xl focus:border-primary focus:ring-0 outline-none transition-colors"
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Passage Editor */}
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg text-academic-500 uppercase tracking-wider text-xs flex justify-between items-center">
+                                    <span>Reading Passage</span>
+                                    <span className="text-academic-400 normal-case text-xs font-normal">Use double newlines to separate paragraphs. Embed [line numbers] directly into the text.</span>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <textarea
+                                    value={(draftQuiz.passage || []).join('\n\n')}
+                                    onChange={(e) => {
+                                        const newPassage = e.target.value.split('\n\n').filter(p => p.trim() !== '');
+                                        setDraftQuiz({ ...draftQuiz, passage: newPassage });
+                                    }}
+                                    className="w-full h-64 p-4 text-base font-serif leading-relaxed border-2 border-academic-200 rounded-xl focus:border-primary focus:ring-0 outline-none transition-colors resize-y"
+                                    placeholder="Enter or edit reading passage here..."
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Questions Editor */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-serif font-bold text-academic-900 border-b-2 border-academic-200 pb-2">Questions ({draftQuiz.questions.length})</h3>
+
+                            {draftQuiz.questions.map((q, qIndex) => (
+                                <Card key={qIndex} className="relative overflow-visible">
+                                    <div className="absolute -left-4 top-6 bg-primary text-white font-bold h-8 w-8 rounded-full flex items-center justify-center shadow-md">
+                                        {qIndex + 1}
+                                    </div>
+                                    <CardContent className="p-6 md:p-8 space-y-6 ml-2">
+
+                                        {/* Question Text */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-academic-500 uppercase tracking-wider mb-2">Question Text</label>
+                                            <textarea
+                                                value={q.text}
+                                                onChange={(e) => {
+                                                    const updatedQuestions = [...draftQuiz.questions];
+                                                    updatedQuestions[qIndex] = { ...q, text: e.target.value };
+                                                    setDraftQuiz({ ...draftQuiz, questions: updatedQuestions });
+                                                }}
+                                                className="w-full p-3 font-medium text-lg border-2 border-academic-200 rounded-xl focus:border-primary focus:ring-0 outline-none transition-colors resize-y min-h-[100px]"
+                                            />
+                                        </div>
+
+                                        {/* Answer Options */}
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-end mb-2">
+                                                <label className="block text-xs font-bold text-academic-500 uppercase tracking-wider">Answer Options</label>
+                                                <label className="block text-xs font-bold text-primary uppercase tracking-wider text-right w-32">Correct Answer</label>
+                                            </div>
+
+                                            {q.options.map((opt, oIndex) => {
+                                                const isCorrect = opt.label === q.correctAnswer;
+                                                return (
+                                                    <div key={oIndex} className={`flex items-start gap-4 p-3 rounded-lg border-2 transition-colors ${isCorrect ? 'border-feedback-success bg-feedback-successLight/30' : 'border-academic-100 bg-academic-50'}`}>
+                                                        <div className={`mt-2 flex-shrink-0 flex items-center justify-center h-8 w-8 rounded font-bold ${isCorrect ? 'bg-feedback-success text-white' : 'bg-academic-200 text-academic-600'}`}>
+                                                            {opt.label}
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            value={opt.text}
+                                                            onChange={(e) => {
+                                                                const updatedQuestions = [...draftQuiz.questions];
+                                                                const updatedOptions = [...q.options];
+                                                                updatedOptions[oIndex] = { ...opt, text: e.target.value };
+                                                                updatedQuestions[qIndex] = { ...q, options: updatedOptions };
+                                                                setDraftQuiz({ ...draftQuiz, questions: updatedQuestions });
+                                                            }}
+                                                            className={`flex-1 p-2 bg-white border border-academic-200 rounded-lg focus:border-primary focus:ring-0 outline-none ${isCorrect ? 'font-medium text-feedback-successDark' : ''}`}
+                                                        />
+                                                        <div className="flex flex-col items-center justify-center pt-1 w-32 shrink-0">
+                                                            <input
+                                                                type="radio"
+                                                                name={`correct-${qIndex}`}
+                                                                checked={isCorrect}
+                                                                onChange={() => {
+                                                                    const updatedQuestions = [...draftQuiz.questions];
+                                                                    updatedQuestions[qIndex] = { ...q, correctAnswer: opt.label };
+                                                                    setDraftQuiz({ ...draftQuiz, questions: updatedQuestions });
+                                                                }}
+                                                                className="h-5 w-5 text-feedback-success focus:ring-feedback-success border-gray-300 mb-1 cursor-pointer"
+                                                            />
+                                                            <span className="text-[10px] uppercase font-bold text-academic-400">Mark Correct</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Explanation */}
+                                        <div className="pt-4 mt-4 border-t border-academic-100">
+                                            <label className="block text-xs font-bold text-academic-500 uppercase tracking-wider mb-2 flex items-center">
+                                                <LibraryBig className="h-4 w-4 mr-2" /> Explanation
+                                            </label>
+                                            <textarea
+                                                value={q.explanation}
+                                                onChange={(e) => {
+                                                    const updatedQuestions = [...draftQuiz.questions];
+                                                    updatedQuestions[qIndex] = { ...q, explanation: e.target.value };
+                                                    setDraftQuiz({ ...draftQuiz, questions: updatedQuestions });
+                                                }}
+                                                className="w-full p-3 text-sm text-academic-700 bg-blue-50/50 border border-blue-100 rounded-xl focus:border-blue-300 focus:ring-0 outline-none transition-colors resize-y h-24"
+                                            />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Projected Question Modal */}
             {projectedQuestion && (
                 <div
@@ -909,7 +1087,8 @@ export default function TeacherDashboard() {
                         </div>
                     </motion.div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
