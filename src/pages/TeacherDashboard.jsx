@@ -1026,20 +1026,25 @@ export default function TeacherDashboard() {
 
                         <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-[#fafaf9]">
                             {/* Left: Reading Pane — uses the projected question's own passage */}
-                            {projectedQuestion.passage && projectedQuestion.passage.length > 0 && (
-                                <div className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-academic-200 custom-scrollbar">
-                                    <h2 className="text-sm font-bold text-academic-400 uppercase tracking-widest mb-6">Reading Passage</h2>
-                                    <div className="prose prose-stone max-w-none text-academic-800 leading-relaxed space-y-4">
-                                        {projectedQuestion.passage.map((paragraph, i) => (
-                                            <p key={i} className="text-lg leading-loose group">
-                                                <span className="font-serif block hover:bg-academic-100/50 p-2 rounded-lg transition-colors cursor-text">
-                                                    {paragraph}
-                                                </span>
-                                            </p>
-                                        ))}
+                            {(() => {
+                                // Filter out empty strings that old-schema quizzes may have stored
+                                const passageParagraphs = (projectedQuestion.passage || []).filter(p => p && p.trim());
+                                if (passageParagraphs.length === 0) return null;
+                                return (
+                                    <div className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-academic-200 custom-scrollbar">
+                                        <h2 className="text-sm font-bold text-academic-400 uppercase tracking-widest mb-6">Reading Passage</h2>
+                                        <div className="prose prose-stone max-w-none text-academic-800 leading-relaxed space-y-4">
+                                            {passageParagraphs.map((paragraph, i) => (
+                                                <p key={i} className="text-lg leading-loose group">
+                                                    <span className="font-serif block hover:bg-academic-100/50 p-2 rounded-lg transition-colors cursor-text">
+                                                        {paragraph}
+                                                    </span>
+                                                </p>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Right: Question Pane */}
                             <div className="w-full md:flex-1 p-6 md:p-12 overflow-y-auto flex flex-col justify-center bg-white custom-scrollbar">
