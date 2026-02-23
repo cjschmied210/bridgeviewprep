@@ -27,6 +27,7 @@ export default function TeacherDashboard() {
     const [selectedTest, setSelectedTest] = useState(null);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [projectedQuestion, setProjectedQuestion] = useState(null);
+    const [answerRevealed, setAnswerRevealed] = useState(false);
     const [testSubmissions, setTestSubmissions] = useState([]);
     const [liveSessions, setLiveSessions] = useState([]);
     const fileInputRef = useRef(null);
@@ -603,7 +604,7 @@ export default function TeacherDashboard() {
                                     <Card
                                         key={q.id}
                                         className="flex flex-col h-full border-t-4 border-t-primary cursor-pointer hover:shadow-md transition-all group relative overflow-hidden"
-                                        onClick={() => setProjectedQuestion(q)}
+                                        onClick={() => { setProjectedQuestion(q); setAnswerRevealed(false); }}
                                     >
                                         <div className="absolute inset-x-0 top-0 h-full bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         <div className="p-4 border-b border-academic-100 bg-academic-50/50 flex justify-between items-center relative z-10">
@@ -1016,12 +1017,26 @@ export default function TeacherDashboard() {
                             <h2 className="text-white font-serif font-bold text-xl flex items-center">
                                 <Activity className="h-5 w-5 mr-3" /> Projected Question
                             </h2>
-                            <button
-                                onClick={() => setProjectedQuestion(null)}
-                                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-full transition-colors"
-                            >
-                                <X className="h-6 w-6" />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                {!answerRevealed ? (
+                                    <button
+                                        onClick={() => setAnswerRevealed(true)}
+                                        className="bg-white text-primary font-bold px-4 py-2 rounded-lg text-sm hover:bg-academic-50 transition-colors shadow"
+                                    >
+                                        Reveal Answer
+                                    </button>
+                                ) : (
+                                    <span className="text-white/80 font-medium text-sm flex items-center gap-2">
+                                        <CheckCircle2 className="h-4 w-4" /> Answer Revealed
+                                    </span>
+                                )}
+                                <button
+                                    onClick={() => setProjectedQuestion(null)}
+                                    className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-[#fafaf9]">
@@ -1055,7 +1070,7 @@ export default function TeacherDashboard() {
 
                                     <div className="space-y-4 w-full">
                                         {projectedQuestion.options.map(opt => {
-                                            const isCorrect = opt.label === projectedQuestion.correctAnswer;
+                                            const isCorrect = answerRevealed && opt.label === projectedQuestion.correctAnswer;
 
                                             return (
                                                 <div
@@ -1064,7 +1079,7 @@ export default function TeacherDashboard() {
                                                         w-full text-left p-6 rounded-xl border-2 flex items-center justify-between transition-all duration-300
                                                         ${isCorrect
                                                             ? 'border-feedback-success bg-feedback-successLight text-feedback-successDark shadow-md scale-[1.02]'
-                                                            : 'border-academic-200 bg-white text-academic-700 opacity-60'
+                                                            : 'border-academic-200 bg-white text-academic-700'
                                                         }
                                                     `}
                                                 >
