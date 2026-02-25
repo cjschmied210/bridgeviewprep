@@ -42,15 +42,18 @@ export default function StudentDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-academic-50 font-sans">
+            <div className="flex-1 flex items-center justify-center bg-academic-50 font-sans">
                 <div className="animate-pulse text-academic-500 font-medium">Loading Dashboard...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-academic-50 font-sans flex flex-col">
-            <header className="bg-white border-b border-academic-200 sticky top-0 z-20 shadow-sm">
+        <div className="flex-1 bg-[url('/campus_bg.png')] bg-cover bg-center bg-fixed font-sans flex flex-col relative overflow-x-hidden">
+            {/* Soft white gradient overlay for readability */}
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-0"></div>
+
+            <header className="bg-white/90 backdrop-blur-md border-b border-academic-200 sticky top-0 z-20 shadow-sm relative">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                         <LibraryBig className="text-primary h-6 w-6" />
@@ -66,10 +69,10 @@ export default function StudentDashboard() {
                 </div>
             </header>
 
-            <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8">
-                <div className="mb-8">
-                    <h2 className="text-3xl font-serif font-bold text-academic-900 tracking-tight">Assigned Quizzes</h2>
-                    <p className="text-academic-500 mt-2">Select a quiz below to begin.</p>
+            <main className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 relative z-10 flex flex-col">
+                <div className="mb-6">
+                    <h2 className="text-3xl font-serif font-extrabold text-academic-900 tracking-tight">Assigned Quizzes</h2>
+                    <p className="text-academic-600 mt-2 font-medium">Select a quiz below to begin.</p>
                 </div>
 
                 {tests.length === 0 ? (
@@ -89,52 +92,51 @@ export default function StudentDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                             >
-                                <Card className="hover:border-primary/50 transition-colors group">
-                                    <CardContent className="p-6 flex flex-col bg-white">
-                                        <div className="flex items-center justify-between cursor-pointer" onClick={() => navigate(`/exam/${test.id}`)}>
+                                <Card
+                                    className="cursor-pointer group bg-white/95 backdrop-blur-sm shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-transparent hover:border-primary/20"
+                                    onClick={() => navigate(`/exam/${test.id}`)}
+                                >
+                                    <CardContent className="p-6 flex flex-col h-full">
+                                        <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-4">
-                                                <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                                                    <FileText size={20} />
+                                                <div className="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-primary group-hover:text-white group-hover:shadow-md transition-all duration-300">
+                                                    <FileText size={24} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-lg font-bold text-academic-900">{test.title || "Untitled Quiz"}</h3>
-                                                    <p className="text-sm text-academic-500">{test.questions?.length || 0} Questions</p>
+                                                    <h3 className="text-xl font-bold text-academic-900 group-hover:text-primary transition-colors">{test.title || "Untitled Quiz"}</h3>
+                                                    <p className="text-sm font-medium text-academic-500">{test.questions?.length || 0} Questions</p>
                                                 </div>
                                             </div>
-                                            {!(test.submissions && test.submissions.length > 0) && (
-                                                <div className="h-10 w-10 rounded-full flex items-center justify-center group-hover:bg-primary/10 text-academic-400 group-hover:text-primary transition-colors">
-                                                    <ChevronRight size={20} />
-                                                </div>
-                                            )}
+
+                                            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-academic-50 text-academic-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors group-hover:translate-x-1 duration-300">
+                                                <ChevronRight size={20} />
+                                            </div>
                                         </div>
 
-                                        <div className="mt-4 pt-4 border-t border-academic-100 flex flex-col gap-2">
-                                            {test.submissions && test.submissions.length > 0 ? (
-                                                <>
-                                                    {test.submissions.map((sub, idx) => (
-                                                        <div key={sub.id} className="flex items-center justify-between text-sm bg-academic-50 p-2 md:px-4 rounded-lg">
-                                                            <div className="flex items-center gap-2 font-medium text-academic-700">
-                                                                <span className="bg-academic-200 text-academic-800 text-xs px-2 py-1 rounded-md">Attempt {idx + 1}</span>
-                                                                Score: {sub.score}%
-                                                            </div>
-                                                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary-dark hover:bg-primary/10" onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                navigate(`/exam/${test.id}`, { state: { mode: 'review', answers: sub.answers, score: sub.score } });
-                                                            }}>
-                                                                <Eye className="h-4 w-4 mr-2" /> Review
-                                                            </Button>
+                                        {test.submissions && test.submissions.length > 0 && (
+                                            <div className="mt-5 pt-4 border-t border-academic-100/60 flex flex-col gap-2 relative">
+                                                {test.submissions.map((sub, idx) => (
+                                                    <div key={sub.id} className="flex items-center justify-between text-sm bg-academic-50/80 p-3 md:px-4 rounded-xl border border-academic-100">
+                                                        <div className="flex items-center gap-3 font-medium text-academic-800">
+                                                            <span className="bg-academic-200/50 text-academic-700 font-bold text-xs px-2.5 py-1 rounded-md uppercase tracking-wider">Attempt {idx + 1}</span>
+                                                            <span className="font-bold">Score: <span className="text-primary">{sub.score}%</span></span>
                                                         </div>
-                                                    ))}
-                                                    <Button variant="outline" className="w-full mt-2 border-primary text-primary hover:bg-primary/5" onClick={() => navigate(`/exam/${test.id}`)}>
-                                                        <RotateCcw className="h-4 w-4 mr-2" /> Retake Quiz
-                                                    </Button>
-                                                </>
-                                            ) : (
-                                                <Button className="w-full" onClick={() => navigate(`/exam/${test.id}`)}>
-                                                    Start Quiz
+                                                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary-dark hover:bg-primary/10 shadow-sm bg-white" onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/exam/${test.id}`, { state: { mode: 'review', answers: sub.answers, score: sub.score } });
+                                                        }}>
+                                                            <Eye className="h-4 w-4 mr-2" /> Review
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                                <Button variant="outline" className="w-full mt-3 border-academic-300 text-academic-700 hover:border-primary hover:text-primary hover:bg-primary/5 shadow-sm group-hover:border-primary/50 transition-all font-medium" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/exam/${test.id}`);
+                                                }}>
+                                                    <RotateCcw className="h-4 w-4 mr-2" /> Retake Quiz
                                                 </Button>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </motion.div>

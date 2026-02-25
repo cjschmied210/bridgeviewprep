@@ -1,13 +1,24 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BridgeviewPrep</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BridgeviewPrep</title>
+</head>
+
+<body style="min-height: 100vh; display: flex; flex-direction: column; margin: 0;">
+  <div id="root" style="flex: 1; display: flex; flex-direction: column;"></div>
+
+  <!-- Global Footer -->
+  <footer
+    style="flex-shrink: 0; width: 100%; padding: 8px 0; background-color: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center; z-index: 50;">
+    <img src="/watermark.png" alt="Bridgeview"
+      style="height: 2.5rem; width: auto; object-fit: contain; opacity: 0.85; filter: grayscale(100%);" />
+  </footer>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

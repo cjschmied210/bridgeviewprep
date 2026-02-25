@@ -6,6 +6,8 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentExam from './pages/StudentExam';
 
+import WatermarkImage from '/watermark.png';
+
 const ProtectedTeacherRoute = ({ children }) => {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/" replace />;
