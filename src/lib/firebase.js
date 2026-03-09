@@ -4,7 +4,9 @@ import { getFirestore } from "firebase/firestore";
 
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-    console.error("VITE_FIREBASE_API_KEY is missing! Site will fail to initialize. Please check Vercel environment variables.");
+    const availableKeys = Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'));
+    console.error("VITE_FIREBASE_API_KEY is missing! Available VITE_ keys:", availableKeys);
+    console.error("Please ensure you have added VITE_FIREBASE_API_KEY to Vercel and triggered a REDEPLOY.");
 }
 
 const firebaseConfig = {
