@@ -1133,7 +1133,13 @@ export default function TeacherDashboard() {
                                     className="w-full p-2.5 bg-white border border-academic-200 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                                     autoFocus
                                     onKeyDown={(e) => {
-                                        if (e.key === 'Enter') handleCreateClassSubmit();
+                                        if (e.key === 'Enter') {
+                                            if (!newClassName.trim()) {
+                                                alert("Make sure to type a class name first!");
+                                                return;
+                                            }
+                                            handleCreateClassSubmit();
+                                        }
                                     }}
                                 />
                             </div>
@@ -1141,8 +1147,14 @@ export default function TeacherDashboard() {
                                 <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }}>
                                     Cancel
                                 </Button>
-                                <Button onClick={handleCreateClassSubmit} disabled={!newClassName.trim() || loading}>
-                                    Create Class
+                                <Button onClick={() => {
+                                    if (!newClassName.trim()) {
+                                        alert("Make sure to type a class name first!");
+                                        return;
+                                    }
+                                    handleCreateClassSubmit();
+                                }}>
+                                    {loading ? 'Creating...' : 'Create Class'}
                                 </Button>
                             </div>
                         </div>
