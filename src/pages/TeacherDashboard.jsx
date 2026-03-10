@@ -16,6 +16,8 @@ export default function TeacherDashboard() {
     const [loading, setLoading] = useState(true);
     const { currentUser, logoutTeacher } = useAuth();
     const [viewMode, setViewMode] = useState('overview'); // 'overview' | 'import' | 'submissions' | 'live_monitor'
+    const [isCreateClassModalOpen, setIsCreateClassModalOpen] = useState(false);
+    const [newClassName, setNewClassName] = useState('');
 
     // Upload State
     const [dragActive, setDragActive] = useState(false);
@@ -74,16 +76,20 @@ export default function TeacherDashboard() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const handleCreateClass = async () => {
-        const name = prompt("Enter a name for the new class:");
-        if (!name) return;
+    const handleCreateClassSubmit = async () => {
+        if (!newClassName.trim()) return;
+        setLoading(true);
         try {
-            const newClass = await dbService.createClass(currentUser.uid, name);
+            const newClass = await dbService.createClass(currentUser.uid, newClassName.trim());
             setClasses([newClass, ...classes]);
             setActiveClassId(newClass.id);
+            setIsCreateClassModalOpen(false);
+            setNewClassName('');
         } catch (err) {
             console.error(err);
             alert("Failed to create class.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -309,7 +315,7 @@ export default function TeacherDashboard() {
                                 <h1 className="text-3xl font-serif font-bold text-academic-900">Welcome back!</h1>
                                 <p className="text-lg text-academic-500 mt-2">Manage your classes and assignments.</p>
                             </div>
-                            <Button size="lg" onClick={handleCreateClass} className="bg-academic-900 hover:bg-academic-800 shadow-sm shrink-0">
+                            <Button size="lg" onClick={() => setIsCreateClassModalOpen(true)} className="bg-academic-900 hover:bg-academic-800 shadow-sm shrink-0">
                                 <FolderPlus className="h-5 w-5 mr-2" />
                                 Create New Class
                             </Button>
@@ -1104,8 +1110,45 @@ export default function TeacherDashboard() {
                         </div>
                     </motion.div>
                 </div>
-            )
-            }
+            )}
+
+            {/* Create Class Modal */}
+            {isCreateClassModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-academic-900/60 backdrop-blur-sm p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md"
+                    >
+                        <h2 className="text-xl font-serif font-bold text-academic-900 mb-4">Create New Class</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-academic-700 mb-1.5">Class Name</label>
+                                <input
+                                    type="text"
+                                    value={newClassName}
+                                    onChange={(e) => setNewClassName(e.target.value)}
+                                    placeholder="e.g. AP World History"
+                                    className="w-full p-2.5 bg-white border border-academic-200 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleCreateClassSubmit();
+                                    }}
+                                />
+                            </div>
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleCreateClassSubmit} disabled={!newClassName.trim() || loading}>
+                                    Create Class
+                                </Button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
         </div >
     );
 }
