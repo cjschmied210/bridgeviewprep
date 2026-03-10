@@ -18,6 +18,7 @@ export default function TeacherDashboard() {
     const [viewMode, setViewMode] = useState('overview'); // 'overview' | 'import' | 'submissions' | 'live_monitor'
     const [isCreateClassModalOpen, setIsCreateClassModalOpen] = useState(false);
     const [newClassName, setNewClassName] = useState('');
+    const [isCreatingClass, setIsCreatingClass] = useState(false);
 
     // Upload State
     const [dragActive, setDragActive] = useState(false);
@@ -77,8 +78,8 @@ export default function TeacherDashboard() {
     };
 
     const handleCreateClassSubmit = async () => {
-        if (!newClassName.trim() || loading) return;
-        setLoading(true);
+        if (!newClassName.trim() || isCreatingClass) return;
+        setIsCreatingClass(true);
         try {
             const newClass = await dbService.createClass(currentUser.uid, newClassName.trim());
             setClasses([newClass, ...classes]);
@@ -89,7 +90,7 @@ export default function TeacherDashboard() {
             console.error(err);
             alert("Failed to create class.");
         } finally {
-            setLoading(false);
+            setIsCreatingClass(false);
         }
     };
 
@@ -1144,17 +1145,17 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div className="flex justify-end space-x-3 mt-6">
-                                <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }} disabled={loading}>
+                                <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }} disabled={isCreatingClass}>
                                     Cancel
                                 </Button>
-                                <Button disabled={loading} onClick={() => {
+                                <Button disabled={isCreatingClass} onClick={() => {
                                     if (!newClassName.trim()) {
                                         alert("Make sure to type a class name first!");
                                         return;
                                     }
                                     handleCreateClassSubmit();
                                 }}>
-                                    {loading ? 'Creating...' : 'Create Class'}
+                                    {isCreatingClass ? 'Creating...' : 'Create Class'}
                                 </Button>
                             </div>
                         </div>
