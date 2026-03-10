@@ -77,7 +77,7 @@ export default function TeacherDashboard() {
     };
 
     const handleCreateClassSubmit = async () => {
-        if (!newClassName.trim()) return;
+        if (!newClassName.trim() || loading) return;
         setLoading(true);
         try {
             const newClass = await dbService.createClass(currentUser.uid, newClassName.trim());
@@ -1144,10 +1144,10 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div className="flex justify-end space-x-3 mt-6">
-                                <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }}>
+                                <Button variant="outline" onClick={() => { setIsCreateClassModalOpen(false); setNewClassName(''); }} disabled={loading}>
                                     Cancel
                                 </Button>
-                                <Button onClick={() => {
+                                <Button disabled={loading} onClick={() => {
                                     if (!newClassName.trim()) {
                                         alert("Make sure to type a class name first!");
                                         return;
