@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-academic-50 text-academic-800 antialiased font-sans;
+  }
+}
+
+@layer components {
+  /* Standard smooth transition for interactive elements */
+  .btn-transition {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-md border border-academic-200 shadow-sm rounded-2xl;
+  }
+}
