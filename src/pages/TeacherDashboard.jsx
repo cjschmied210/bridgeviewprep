@@ -1118,7 +1118,8 @@ export default function TeacherDashboard() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md"
+                        className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative z-[60]"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-xl font-serif font-bold text-academic-900 mb-4">Create New Class</h2>
                         <div className="space-y-4">
